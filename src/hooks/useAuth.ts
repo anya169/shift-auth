@@ -5,8 +5,12 @@ import type { AuthRequest, OtpRequest } from '../api/types';
 
 
 export const useSendOtp = () => {
+    const setDelay = useAuthStore(state => state.setDelay);
     return useMutation({
         mutationFn: (data: OtpRequest) => authApi.createOtp(data),
+        onSuccess: (data) => {
+            setDelay(data.retryDelay);
+        }
     });
 };
 
