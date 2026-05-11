@@ -15,10 +15,9 @@ export const Button = ({
 }: ButtonProps) => {
     const baseStyles = `
         px-8 py-4
-        rounded-lg
+        rounded-2xl
         text-base font-semibold
         transition-colors duration-200      
-        focus:ring-2 focus:ring-offset-2 
         disabled:cursor-not-allowed
     `;
 
@@ -26,12 +25,13 @@ export const Button = ({
         primary: `
             bg-button-default text-white
             hover:bg-button-hover
-            focus:ring-button-light-blue
+            focus:ring-2 focus:ring-offset-2 focus:ring-button-light-blue
             disabled:bg-button-light-blue disabled:text-white/70
         `,
         secondary: `
-            bg-white text-text-secondary
+            bg-white text-text-secondary font-semibold
             hover:bg-secondary-button-hover
+            focus:outline-none focus:ring-0 focus:bg-white
             disabled:text-placeholder-gray
         `
     };
