@@ -6,12 +6,23 @@ import { Button } from './ui/Button';
 import { useSendOtp, useSignIn } from '../hooks/useAuth';
 import { useAuthStore } from '../stores/authStore';
 
+const PHONE_FORMAT = {
+    DISPLAY_START: 1,
+    DISPLAY_END: 19,
+    MIN_LENGTH: 16,
+} as const;
+
+const formatPhoneForDisplay = (phone: string): string => {
+    if (!phone) return '';
+        return phone.slice(PHONE_FORMAT.DISPLAY_START, PHONE_FORMAT.DISPLAY_END);
+};
+
 interface PhoneFormData {
     phone: string;
 }
 
 interface CodeFormData {
-    code: number;
+    code: string;
 }
 
 export const AuthForm = () => {
@@ -25,7 +36,6 @@ export const AuthForm = () => {
         register: registerPhone, 
         handleSubmit: handlePhoneSubmit, 
         formState: { errors: phoneErrors },
-        getValues 
     } = useForm<PhoneFormData>();
 
     const { 
@@ -62,7 +72,7 @@ export const AuthForm = () => {
     };
 
     const onCodeSubmit = (data: CodeFormData) => {
-        signIn({ phone: phoneNumber, code: data.code });
+        signIn({ phone: phoneNumber, code: Number(data.code) });
     };
 
     // Таймер
@@ -88,7 +98,7 @@ export const AuthForm = () => {
      // Повторная отправка кода
     const handleResendCode = () => {
         if (timeLeft === 0 && phoneNumber) {
-            setCodeValue('code', '' as any);
+            setCodeValue('code', '');
             clearErrors('code');
             resetSignInError?.();
             
@@ -106,11 +116,11 @@ export const AuthForm = () => {
                         <h3 className="text-base mb-6">Введите номер телефона для входа в личный кабинет</h3>
                         <PhoneInput 
                             error={phoneErrors.phone?.message}
-                            inputMode="numeric"
+                            inputMode="tel"
                             {...registerPhone('phone', {
                                 required: 'Поле является обязательным',
                                 minLength: {
-                                    value: 16, 
+                                    value: PHONE_FORMAT.MIN_LENGTH, 
                                     message: 'Введите полный номер телефона',
                                 },
                             })}
@@ -128,7 +138,7 @@ export const AuthForm = () => {
                     <>
                         <h3 className="text-base mb-6">Введите проверочный код для входа в личный кабинет</h3>
                         <PhoneInput 
-                            value={getValues('phone').slice(2, 19)}
+                            value={phoneNumber ? formatPhoneForDisplay(phoneNumber) : ''}
                             disabled={true}
                             error={phoneErrors.phone?.message}
                         />
@@ -161,23 +171,23 @@ export const AuthForm = () => {
                             
                         </div>
 
-                         <div>
-                                {timeLeft > 0 ? (
-                                    <p className="text-sm text-border-gray">
-                                        Запросить код повторно можно через {timeLeft} секунд
-                                    </p>
-                                ) : (
-                                    <Button 
-                                        type="button"
-                                        variant="secondary"
-                                        onClick={handleResendCode}
-                                        disabled={isSendingOtp}
-                                        className="w-[328px]"
-                                    >
-                                        Запросить код еще раз
-                                    </Button>
-                                )}
-                            </div>
+                        <div>
+                            {timeLeft > 0 ? (
+                                <p className="text-sm text-border-gray">
+                                    Запросить код повторно можно через {timeLeft} секунд
+                                </p>
+                            ) : (
+                                <Button 
+                                    type="button"
+                                    variant="secondary"
+                                    onClick={handleResendCode}
+                                    disabled={isSendingOtp}
+                                    className="w-[328px]"
+                                >
+                                    Запросить код еще раз
+                                </Button>
+                            )}
+                        </div>
                     </>
                 )}
             </form>
