@@ -1,10 +1,12 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { PhoneInput } from './PhoneInput';
 import { CodeInput } from './CodeInput';
 import { Button } from './ui/Button';
 import { useSendOtp, useSignIn } from '../hooks/useAuth';
 import { useAuthStore } from '../stores/authStore';
+import { useNow } from '../hooks/useNow';
+import { useRetryTimer } from '../hooks/useRetryTimer';
 
 const PHONE_FORMAT = {
     DISPLAY_START: 1,
@@ -30,7 +32,6 @@ export const AuthForm = () => {
     const [phoneNumber, setPhoneNumber] = useState('');
     const retryDelay = useAuthStore(state => state.retryDelay);
     const resetDelay = useAuthStore(state => state.resetDelay);
-    const [timeLeft, setTimeLeft] = useState<number>(0);
 
     const { 
         register: registerPhone, 
@@ -76,24 +77,7 @@ export const AuthForm = () => {
     };
 
     // Таймер
-    useEffect(() => {
-        if (retryDelay && retryDelay > 0) {
-            setTimeLeft(Math.ceil(retryDelay / 1000));
-            
-            const timer = setInterval(() => {
-                setTimeLeft((prev) => {
-                    if (prev <= 1) {
-                        clearInterval(timer);
-                        resetDelay(); 
-                        return 0;
-                    }
-                    return prev - 1;
-                });
-            }, 1000);
-            
-            return () => clearInterval(timer);
-        }
-    }, [retryDelay, resetDelay]);
+    const timeLeft = useRetryTimer(retryDelay, resetDelay);
 
      // Повторная отправка кода
     const handleResendCode = () => {
@@ -173,7 +157,7 @@ export const AuthForm = () => {
 
                         <div>
                             {timeLeft > 0 ? (
-                                <p className="text-sm text-border-gray">
+                                <p className="text-sm leading-5 text-border-gray">
                                     Запросить код повторно можно через {timeLeft} секунд
                                 </p>
                             ) : (
