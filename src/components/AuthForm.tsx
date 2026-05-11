@@ -1,23 +1,13 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { PhoneInput } from './PhoneInput';
 import { CodeInput } from './CodeInput';
 import { Button } from './ui/Button';
 import { useSendOtp, useSignIn } from '../hooks/useAuth';
 import { useAuthStore } from '../stores/authStore';
-import { useNow } from '../hooks/useNow';
 import { useRetryTimer } from '../hooks/useRetryTimer';
+import { formatPhoneForDisplay, PHONE_FORMAT } from '../constants/phone';
 
-const PHONE_FORMAT = {
-    DISPLAY_START: 1,
-    DISPLAY_END: 19,
-    MIN_LENGTH: 16,
-} as const;
-
-const formatPhoneForDisplay = (phone: string): string => {
-    if (!phone) return '';
-        return phone.slice(PHONE_FORMAT.DISPLAY_START, PHONE_FORMAT.DISPLAY_END);
-};
 
 interface PhoneFormData {
     phone: string;
